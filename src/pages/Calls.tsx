@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Phone, Play, FileText, Clock, Search, Filter, Download, Calendar, User, MapPin } from "lucide-react"
+import { AudioPlayer } from "@/components/AudioPlayer"
+import { Phone, Play, FileText, Clock, Search, Filter, Download, Calendar, User, MapPin, Volume2 } from "lucide-react"
 
 const allCalls = [
   {
@@ -190,6 +191,7 @@ const Calls = () => {
   const [statusFilter, setStatusFilter] = useState("all")
   const [outcomeFilter, setOutcomeFilter] = useState("all")
   const [selectedCall, setSelectedCall] = useState<typeof allCalls[0] | null>(null)
+  const [audioPlayerCall, setAudioPlayerCall] = useState<typeof allCalls[0] | null>(null)
 
   const filteredCalls = allCalls.filter(call => {
     const matchesSearch = call.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -342,10 +344,27 @@ const Calls = () => {
                   </div>
 
                   <div className="flex flex-col gap-2 ml-6">
-                    <Button size="sm" variant="outline" className="gap-2">
-                      <Play className="w-4 h-4" />
-                      Play Recording
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="gap-2" onClick={() => setAudioPlayerCall(call)}>
+                          <Volume2 className="w-4 h-4" />
+                          Play Recording
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Call Recording</DialogTitle>
+                        </DialogHeader>
+                        {audioPlayerCall && (
+                          <AudioPlayer
+                            callId={audioPlayerCall.id}
+                            patientName={audioPlayerCall.patientName}
+                            duration={audioPlayerCall.duration}
+                          />
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                    
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button size="sm" variant="outline" className="gap-2" onClick={() => setSelectedCall(call)}>
@@ -355,28 +374,84 @@ const Calls = () => {
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl max-h-[80vh]">
                         <DialogHeader>
-                          <DialogTitle>Call Transcript - {call.patientName}</DialogTitle>
+                          <DialogTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            Call Transcript - {selectedCall?.patientName}
+                          </DialogTitle>
                         </DialogHeader>
                         <ScrollArea className="h-[60vh] w-full">
                           <div className="space-y-4 p-4">
-                            <div className="grid grid-cols-2 gap-4 text-sm bg-muted p-4 rounded">
-                              <div><strong>Duration:</strong> {call.duration}</div>
-                              <div><strong>Agent:</strong> {call.aiAgent}</div>
-                              <div><strong>Outcome:</strong> {call.outcome.replace('_', ' ')}</div>
-                              <div><strong>Department:</strong> {call.department}</div>
-                            </div>
-                            <div className="bg-background border rounded p-4">
-                              <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-                                {call.transcript}
-                              </pre>
-                            </div>
+                            {selectedCall && (
+                              <>
+                                <div className="grid grid-cols-2 gap-4 text-sm bg-muted p-4 rounded">
+                                  <div><strong>Call ID:</strong> {selectedCall.id}</div>
+                                  <div><strong>Duration:</strong> {selectedCall.duration}</div>
+                                  <div><strong>Agent:</strong> {selectedCall.aiAgent}</div>
+                                  <div><strong>Department:</strong> {selectedCall.department}</div>
+                                  <div><strong>Outcome:</strong> {selectedCall.outcome.replace('_', ' ')}</div>
+                                  <div><strong>Phone:</strong> {selectedCall.phoneNumber}</div>
+                                </div>
+                                
+                                <div className="bg-background border rounded p-6">
+                                  <h4 className="font-semibold mb-4 text-primary">Full Conversation Transcript</h4>
+                                  <div className="space-y-3">
+                                    {selectedCall.transcript.split('\n\n').map((segment, index) => {
+                                      if (segment.startsWith('AI:')) {
+                                        return (
+                                          <div key={index} className="flex gap-3">
+                                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs font-bold">
+                                              AI
+                                            </div>
+                                            <div className="flex-1 bg-primary/5 p-3 rounded-lg">
+                                              <p className="text-sm">{segment.replace('AI: ', '')}</p>
+                                            </div>
+                                          </div>
+                                        )
+                                      } else if (segment.startsWith('Patient:')) {
+                                        return (
+                                          <div key={index} className="flex gap-3 justify-end">
+                                            <div className="flex-1 bg-muted p-3 rounded-lg text-right">
+                                              <p className="text-sm">{segment.replace('Patient: ', '')}</p>
+                                            </div>
+                                            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-xs font-bold">
+                                              PT
+                                            </div>
+                                          </div>
+                                        )
+                                      } else if (segment.startsWith('[') || segment.startsWith('System:')) {
+                                        return (
+                                          <div key={index} className="text-center">
+                                            <div className="inline-block bg-muted/50 px-3 py-1 rounded text-xs text-muted-foreground">
+                                              {segment}
+                                            </div>
+                                          </div>
+                                        )
+                                      }
+                                      return null
+                                    })}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex gap-4 pt-4 border-t">
+                                  <Button variant="outline" size="sm">
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Download Transcript
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Email Transcript
+                                  </Button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </ScrollArea>
                       </DialogContent>
                     </Dialog>
+                    
                     <Button size="sm" variant="outline" className="gap-2">
                       <Download className="w-4 h-4" />
-                      Download
+                      Download All
                     </Button>
                   </div>
                 </div>
