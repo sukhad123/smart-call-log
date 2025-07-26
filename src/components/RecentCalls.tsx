@@ -11,14 +11,14 @@ const recentCalls = [
     timestamp: "2024-01-15 14:30:22",
     duration: "5:42",
     status: "completed",
-    outcome: "booking_confirmed",
+  
     aiAgent: "Agent-01",
     transcript: "Patient called to schedule a routine checkup. Successfully booked appointment for Jan 22nd at 2:00 PM with Dr. Smith...",
     appointmentDate: "2024-01-22 14:00:00",
     department: "General Medicine"
   },
   {
-    id: "call-002", 
+    id: "call-002",
     patientName: "Michael Chen",
     phoneNumber: "+1 (555) 987-6543",
     timestamp: "2024-01-15 14:15:10",
@@ -41,11 +41,11 @@ const recentCalls = [
     aiAgent: "Agent-01",
     transcript: "Patient needed urgent cardiology consultation. Scheduled emergency appointment for tomorrow morning...",
     appointmentDate: "2024-01-16 09:00:00",
-    department: "Cardiology"
+   
   },
   {
     id: "call-004",
-    patientName: "David Wilson", 
+    patientName: "David Wilson",
     phoneNumber: "+1 (555) 321-0987",
     timestamp: "2024-01-15 13:22:18",
     duration: "2:45",
@@ -59,7 +59,7 @@ const recentCalls = [
   {
     id: "call-005",
     patientName: "Lisa Thompson",
-    phoneNumber: "+1 (555) 654-3210", 
+    phoneNumber: "+1 (555) 654-3210",
     timestamp: "2024-01-15 12:58:45",
     duration: "4:32",
     status: "completed",
@@ -70,22 +70,6 @@ const recentCalls = [
     department: "Dermatology"
   }
 ]
-
-const getStatusBadge = (status: string, outcome: string) => {
-  if (status === "completed" && outcome === "booking_confirmed") {
-    return <Badge className="bg-success text-success-foreground">Booking Confirmed</Badge>
-  }
-  if (status === "completed" && outcome === "information_provided") {
-    return <Badge variant="secondary">Info Provided</Badge>
-  }
-  if (status === "completed" && outcome === "rescheduled") {
-    return <Badge className="bg-warning text-warning-foreground">Rescheduled</Badge>
-  }
-  if (status === "missed_call") {
-    return <Badge variant="destructive">Missed Call</Badge>
-  }
-  return <Badge variant="outline">{outcome.replace('_', ' ')}</Badge>
-}
 
 export function RecentCalls() {
   return (
@@ -104,9 +88,9 @@ export function RecentCalls() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h4 className="font-semibold text-foreground">{call.patientName}</h4>
-                    {getStatusBadge(call.status, call.outcome)}
+                    
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-3">
                     <div className="flex items-center gap-1">
                       <Phone className="w-3 h-3" />
@@ -124,11 +108,7 @@ export function RecentCalls() {
                     {call.transcript}
                   </p>
 
-                  {call.appointmentDate && (
-                    <div className="text-sm text-primary font-medium">
-                      📅 Appointment: {new Date(call.appointmentDate).toLocaleString()}
-                    </div>
-                  )}
+                
                 </div>
 
                 <div className="flex flex-col gap-2 ml-4">
@@ -142,14 +122,14 @@ export function RecentCalls() {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
                 {new Date(call.timestamp).toLocaleString()}
               </div>
             </div>
           ))}
         </div>
-        
+
         <div className="mt-6 text-center">
           <Button variant="outline">View All Calls</Button>
         </div>

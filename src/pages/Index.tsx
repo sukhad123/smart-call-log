@@ -14,7 +14,7 @@ const Index = () => {
       </div>
 
       {/* Stats Overview */}
-      <DashboardStats />
+    
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
